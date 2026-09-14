@@ -1,0 +1,23 @@
+{
+  "name": "TOMORO COFFEE Expiry Monitor",
+  "short_name": "Expiry Monitor",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f7f7",
+  "theme_color": "#ff6633",
+  "description": "TOMORO COFFEE product expiry and kitchen reminder monitor.",
+  "icons": [
+    {
+      "src": "logo-tomoro.png",
+      "sizes": "768x213",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}

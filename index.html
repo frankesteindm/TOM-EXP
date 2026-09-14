@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#ff6633" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="icon" href="logo-tomoro.png" type="image/png" />
+  <link rel="stylesheet" href="style.css" />
+  <title>TOMORO COFFEE — Expiry Monitor</title>
+</head>
+<body>
+
+  <div id="authGate" class="auth-gate">
+    <div class="auth-card">
+      <img src="logo-tomoro.png" class="auth-logo" alt="TOMORO COFFEE">
+      <p class="eyebrow">EXPIRY MONITOR</p>
+      <h2>Login Outlet</h2>
+      <p class="subtle">Masuk menggunakan akun yang sudah dibuat di Supabase Authentication.</p>
+      <form id="loginForm" class="auth-form">
+        <label>Email / ID Login
+          <input id="loginEmail" type="text" autocomplete="username" placeholder="contoh: outlet001@expiry.local" required>
+        </label>
+        <label>Password
+          <input id="loginPassword" type="password" autocomplete="current-password" placeholder="Password" required>
+        </label>
+        <button type="submit" class="primary-btn auth-submit">LOGIN</button>
+        <p id="authMessage" class="auth-message"></p>
+      </form>
+    </div>
+  </div>
+
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-logo-wrap">
+          <img src="logo-tomoro.png" class="brand-logo" alt="TOMORO COFFEE">
+        </div>
+        <div class="brand-info">
+          <strong>EXPIRY MONITOR</strong>
+          <span>Food Safety System</span>
+        </div>
+      </div>
+
+      <div id="accountPanel" class="account-panel" hidden>
+        <div class="account-dot"></div>
+        <div class="account-copy">
+          <strong id="workspaceName">Workspace</strong>
+          <span id="currentUserEmail">-</span>
+        </div>
+        <button id="logoutBtn" class="logout-btn" type="button">Keluar</button>
+      </div>
+
+      <nav>
+        <button class="nav-item active">Dashboard</button>
+        <button class="nav-item" id="jumpAdd">Tambah Produk</button>
+        <button class="nav-item" id="enableNotif">Aktifkan Notifikasi</button>
+        <button class="nav-item" id="installApp" hidden>Install App</button>
+      </nav>
+      <div class="sidebar-note"><span>🔔</span><p>Notifikasi lokal bekerja paling baik saat aplikasi/browser tetap aktif. Untuk alarm saat aplikasi tertutup total, gunakan backend push atau aplikasi native.</p></div>
+    </aside>
+
+    <main>
+      <header class="topbar">
+        <div class="topbar-title">
+          <div class="mobile-brand">
+            <img src="logo-tomoro.png" alt="TOMORO COFFEE">
+          </div>
+          <p class="eyebrow">TOMORO COFFEE • F&B OPERATIONS</p>
+          <h2>Dashboard Expiry Produk</h2>
+          <p class="subtle">Pantau expiry dan reminder produk secara real-time.</p>
+        </div>
+        <div class="top-actions">
+          <button class="alarm-enable-btn" id="enableSoundAlarm">🔊 Aktifkan Alarm Suara</button>
+          <button class="secondary-btn" id="notifTopBtn">🔔 Aktifkan Notifikasi</button>
+          <button class="primary-btn" id="openModalBtn">+ Tambah Produk</button>
+        </div>
+      </header>
+
+
+      <section class="alarm-ready-card" id="alarmReadyCard">
+        <div class="alarm-control-copy">
+          <strong>Kitchen Alarm</strong>
+          <p id="alarmReadyText">Aktifkan alarm agar warning dan expired bisa memicu suara saat halaman tetap terbuka.</p>
+        </div>
+        <div class="alarm-settings-row">
+          <label>
+            Suara
+            <select id="alarmSoundSelect">
+              <option value="siren">Siren</option>
+              <option value="beep">Beep Cepat</option>
+              <option value="bell">Bell</option>
+            </select>
+          </label>
+          <button class="secondary-btn" id="testAlarmBtn">▶ Test Alarm</button>
+          <button class="alarm-enable-btn" id="alarmReadyAction">🔊 Aktifkan Alarm</button>
+        </div>
+      </section>
+
+      <section class="notification-card" id="notificationCard">
+        <div>
+          <strong>Notifikasi HP</strong>
+          <p id="notifStatus">Belum diaktifkan.</p>
+        </div>
+        <button class="primary-btn" id="notificationAction">Aktifkan</button>
+      </section>
+
+      <section class="stats-grid">
+        <article class="stat-card"><div class="stat-icon neutral">📦</div><div><p>Total Produk</p><strong id="totalCount">0</strong></div></article>
+        <article class="stat-card"><div class="stat-icon warning">⏳</div><div><p>≤ 3 Hari</p><strong id="warningCount">0</strong></div></article>
+        <article class="stat-card"><div class="stat-icon danger">⚠️</div><div><p>≤ 24 Jam</p><strong id="urgentCount">0</strong></div></article>
+        <article class="stat-card"><div class="stat-icon expired">🗑️</div><div><p>Expired</p><strong id="expiredCount">0</strong></div></article>
+      </section>
+
+      <section class="panel controls-panel">
+        <div class="search-wrap"><input id="searchInput" type="search" placeholder="Cari produk, batch, kategori, lokasi..." /></div>
+        <div class="filters">
+          <select id="statusFilter">
+            <option value="all">Semua Status</option>
+            <option value="safe">Aman</option><option value="warning">Warning</option>
+            <option value="urgent">Segera Expired</option><option value="expired">Expired</option>
+          </select>
+          <select id="sortSelect">
+            <option value="soonest">Expired Terdekat</option>
+            <option value="latest">Expired Terlama</option>
+            <option value="name">Nama A-Z</option>
+          </select>
+        </div>
+      </section>
+
+      <section class="panel products-panel">
+        <div class="section-heading">
+          <div><p class="eyebrow">LIVE MONITORING</p><h3>Produk Aktif</h3></div>
+          <span id="lastUpdated" class="update-badge">Update real-time</span>
+        </div>
+        <div id="productGrid" class="product-grid"></div>
+        <div id="emptyState" class="empty-state hidden"><div class="empty-icon">📭</div><h3>Tidak ada produk</h3><p>Tambahkan produk baru atau ubah filter.</p></div>
+      </section>
+    </main>
+  </div>
+
+
+  <div id="expiryAlarmOverlay" class="expiry-alarm-overlay hidden">
+    <div class="expiry-alarm-card" id="expiryAlarmCard">
+      <div class="alarm-icon" id="alarmIcon">🚨</div>
+      <p class="alarm-kicker" id="alarmKicker">PRODUK EXPIRED</p>
+      <h2 id="alarmProductName">Produk telah expired</h2>
+      <p id="alarmProductDetail" class="alarm-product-detail"></p>
+      <div class="alarm-pulse" id="alarmPulse">ALARM AKTIF</div>
+      <div class="alarm-action-grid">
+        <button id="snoozeAlarmBtn" class="snooze-alarm-btn">⏰ SNOOZE 5 MENIT</button>
+        <button id="stopAlarmBtn" class="stop-alarm-btn">■ HENTIKAN ALARM</button>
+      </div>
+      <p class="alarm-note">Gunakan Snooze bila produk belum bisa ditangani sekarang.</p>
+    </div>
+  </div>
+
+  <div id="modal" class="modal hidden">
+    <div class="modal-backdrop" id="modalBackdrop"></div>
+    <div class="modal-card">
+      <div class="modal-header">
+        <div><p class="eyebrow">INPUT PRODUK</p><h3>Tambah Produk</h3></div>
+        <button class="icon-btn" id="closeModalBtn">✕</button>
+      </div>
+      <form id="productForm">
+        <div class="form-grid">
+          <label>Nama Produk<input name="name" required placeholder="Fresh Milk 1L" /></label>
+          <label>Batch<input name="batch" required placeholder="FM-140926" /></label>
+          <label>Kategori
+            <select name="category"><option>Dairy</option><option>Meat</option><option>Sauce</option><option>Bakery</option><option>Beverage</option><option>Frozen</option><option>Dry Goods</option><option>Lainnya</option></select>
+          </label>
+          <label>Lokasi Penyimpanan<input name="location" required placeholder="Chiller A" /></label>
+          <label>Qty<input name="qty" type="number" min="1" value="1" required /></label>
+          <label>Satuan<input name="unit" value="pcs" required /></label>
+          <label class="full">Tanggal & Jam Expired<input name="expiry" type="datetime-local" required /></label>
+          <fieldset class="full reminder-box">
+            <legend>Warning sebelum expired</legend>
+            <label class="check">
+              Reminder
+              <select name="warningMinutes" id="warningMinutesSelect">
+                <option value="5">5 menit sebelum expired</option>
+                <option value="10" selected>10 menit sebelum expired</option>
+                <option value="15">15 menit sebelum expired</option>
+                <option value="30">30 menit sebelum expired</option>
+                <option value="60">1 jam sebelum expired</option>
+              </select>
+            </label>
+          </fieldset>
+          <label class="full">PIC / Catatan<input name="note" placeholder="Kitchen Shift Pagi" /></label>
+        </div>
+        <div class="modal-actions"><button type="button" class="secondary-btn" id="cancelBtn">Batal</button><button type="submit" class="primary-btn">Simpan Produk</button></div>
+      </form>
+    </div>
+  </div>
+
+  <template id="productCardTemplate">
+    <article class="product-card">
+      <div class="card-top">
+        <div><span class="category-badge"></span><h4 class="product-name"></h4><p class="product-meta"></p></div>
+        <span class="status-pill"></span>
+      </div>
+      <div class="countdown-box"><p>SISA WAKTU</p><strong class="countdown"></strong></div>
+      <div class="detail-grid">
+        <div><span>Expired</span><strong class="expiry-date"></strong></div>
+        <div><span>Lokasi</span><strong class="location"></strong></div>
+        <div><span>Stok</span><strong class="stock"></strong></div>
+        <div><span>Warning</span><strong class="reminder-list"></strong></div>
+      </div>
+      <div class="card-actions"><button class="test-btn">🔔 Test</button><button class="used-btn">✓ Digunakan</button><button class="delete-btn">Hapus</button></div>
+    </article>
+  </template>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase-config.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
