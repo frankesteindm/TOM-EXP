@@ -1,0 +1,15 @@
+FIX V2
+- Semua tombol dashboard disambungkan kembali.
+- Add Product modal open/close.
+- Notification buttons.
+- Enable/Test alarm.
+- Search, status filter, sort.
+- PWA install handler.
+- Service worker cache dinaikkan ke v3 + cache-busting app.js.
+- Supabase CRUD/realtime tetap digunakan.
+
+Setelah deploy ke Vercel:
+1. Deploy seluruh isi folder ini.
+2. Buka website.
+3. Hard refresh Ctrl+Shift+R.
+4. Jika masih versi lama: DevTools > Application > Service Workers > Unregister, lalu refresh.

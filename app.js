@@ -352,8 +352,28 @@ function renderProducts(){
       !query ||
       (p.name || "").toLowerCase().includes(query) ||
       (p.batch || "").toLowerCase().includes(query) ||
-      (p.category || "").toLowerCase().includes(query)
+      (p.category || "").toLowerCase().includes(query) ||
+      (p.location || "").toLowerCase().includes(query)
     );
+
+    const filter = $("#statusFilter")?.value || "all";
+    if (filter !== "all") {
+      list = list.filter(p => {
+        const st = statusFor(p);
+        if (filter === "safe") return st.cls === "safe" && p.status === "active";
+        if (filter === "warning") return st.cls === "warning" || st.cls === "urgent";
+        if (filter === "expired") return remainingMs(p) <= 0 && p.status === "active";
+        return true;
+      });
+    }
+
+    const sort = $("#sortSelect")?.value || "expiryAsc";
+    list.sort((a,b) => {
+      if (sort === "expiryDesc") return new Date(b.expiry_at) - new Date(a.expiry_at);
+      if (sort === "nameAsc") return (a.name||"").localeCompare(b.name||"","id");
+      return new Date(a.expiry_at) - new Date(b.expiry_at);
+    });
+
     container.innerHTML = list.length
       ? list.map(productCardHtml).join("")
       : `<div class="empty-state"><strong>Belum ada produk</strong><p>Tambahkan produk untuk mulai memantau expiry.</p></div>`;
@@ -397,10 +417,12 @@ document.addEventListener("click", async (e)=>{
 $("#searchInput")?.addEventListener("input", renderProducts);
 
 function closeProductModalIfAny(){
-  const modal = $("#productModal") || $(".modal");
+  const modal = $("#modal") || $("#productModal") || $(".modal");
   if (modal) {
+    modal.classList.add("hidden");
     modal.classList.remove("open","show","active");
     if (modal.hasAttribute("open")) modal.removeAttribute("open");
+    document.body.style.overflow = "";
   }
 }
 
@@ -528,3 +550,125 @@ document.addEventListener("click",(e)=>{
     try { ensureAudio(); beep(880,.12,.12); } catch{}
   }
 });
+
+
+/* =========================================================
+   UI CONTROLS - FIX V2
+   Menghubungkan kembali semua tombol UI setelah migrasi Supabase
+========================================================= */
+(function initUIControls(){
+  const byId = id => document.getElementById(id);
+
+  function openProductModal(){
+    const modal = byId("modal");
+    if (!modal) return;
+    modal.classList.remove("hidden");
+    document.body.style.overflow = "hidden";
+    const first = modal.querySelector('input[name="name"]');
+    setTimeout(() => first?.focus(), 50);
+  }
+
+  function closeProductModal(){
+    const modal = byId("modal");
+    if (!modal) return;
+    modal.classList.add("hidden");
+    document.body.style.overflow = "";
+  }
+
+  ["openModalBtn","jumpAdd"].forEach(id => {
+    byId(id)?.addEventListener("click", openProductModal);
+  });
+  ["closeModalBtn","cancelBtn","modalBackdrop"].forEach(id => {
+    byId(id)?.addEventListener("click", closeProductModal);
+  });
+
+  // Override helper used after successful Supabase insert.
+  window.closeProductModalUI = closeProductModal;
+
+  // Notification permission
+  async function requestNotifications(){
+    const status = byId("notifStatus");
+    if (!("Notification" in window)) {
+      if (status) status.textContent = "Browser ini tidak mendukung notifikasi.";
+      return;
+    }
+    try {
+      const permission = await Notification.requestPermission();
+      if (permission === "granted") {
+        if (status) status.textContent = "Notifikasi aktif.";
+        ["enableNotif","notifTopBtn","notificationAction"].forEach(id=>{
+          const el=byId(id); if(el) el.textContent="✓ Notifikasi Aktif";
+        });
+        new Notification("Expiry Monitor", { body:"Notifikasi berhasil diaktifkan." });
+      } else {
+        if (status) status.textContent = "Izin notifikasi belum diberikan.";
+      }
+    } catch(err) {
+      console.error(err);
+      if (status) status.textContent = "Gagal mengaktifkan notifikasi.";
+    }
+  }
+  ["enableNotif","notifTopBtn","notificationAction"].forEach(id=>{
+    byId(id)?.addEventListener("click", requestNotifications);
+  });
+
+  // Unlock WebAudio from a user gesture.
+  async function unlockAudio(){
+    try {
+      ensureAudio();
+      if (audioCtx?.state === "suspended") await audioCtx.resume();
+      beep(880,.12,.12);
+      const text = byId("alarmReadyText");
+      if(text) text.textContent="Alarm suara aktif. Biarkan halaman tetap terbuka agar alarm dapat berbunyi.";
+      ["enableSoundAlarm","alarmReadyAction"].forEach(id=>{
+        const el=byId(id); if(el) el.textContent="✓ Alarm Suara Aktif";
+      });
+    } catch(err) {
+      console.error(err);
+      alert("Browser tidak dapat mengaktifkan audio.");
+    }
+  }
+  ["enableSoundAlarm","alarmReadyAction"].forEach(id=>{
+    byId(id)?.addEventListener("click", unlockAudio);
+  });
+
+  byId("testAlarmBtn")?.addEventListener("click", async ()=>{
+    await unlockAudio();
+    const sound = byId("alarmSoundSelect")?.value || "siren";
+    if(sound === "beep"){
+      beep(900,.12,.22); setTimeout(()=>beep(900,.12,.22),180); setTimeout(()=>beep(900,.12,.22),360);
+    } else if(sound === "bell"){
+      beep(660,.35,.20); setTimeout(()=>beep(880,.45,.18),320);
+    } else {
+      soundPattern("expired");
+    }
+  });
+
+  // Search/filter/sort. renderProducts reads these controls.
+  ["statusFilter","sortSelect"].forEach(id=>{
+    byId(id)?.addEventListener("change", renderProducts);
+  });
+
+  // PWA install
+  let deferredPrompt = null;
+  window.addEventListener("beforeinstallprompt", e=>{
+    e.preventDefault();
+    deferredPrompt = e;
+    const btn=byId("installApp");
+    if(btn) btn.hidden=false;
+  });
+  byId("installApp")?.addEventListener("click", async ()=>{
+    if(!deferredPrompt) return;
+    deferredPrompt.prompt();
+    await deferredPrompt.userChoice;
+    deferredPrompt=null;
+    byId("installApp").hidden=true;
+  });
+
+  // Service worker
+  if("serviceWorker" in navigator){
+    window.addEventListener("load", ()=>{
+      navigator.serviceWorker.register("service-worker.js").catch(console.error);
+    });
+  }
+})();
