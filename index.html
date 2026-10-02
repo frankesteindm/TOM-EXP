@@ -7,18 +7,18 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="icon" href="logo-tomoro.png" type="image/png" />
   <link rel="stylesheet" href="style.css" />
-  <title>TOMORO COFFEE — Expiry Monitor</title>
+  <title>TOMORO COFFEE — Expired Monitoring</title>
 </head>
 <body>
 
   <div id="authGate" class="auth-gate">
     <div class="auth-card">
       <img src="logo-tomoro.png" class="auth-logo" alt="TOMORO COFFEE">
-      <p class="eyebrow">EXPIRY MONITOR</p>
+      <p class="eyebrow">EXPIRED MONITORING</p>
       <h2>Login Outlet</h2>
-      <p class="subtle">Masuk menggunakan akun yang sudah dibuat di Supabase Authentication.</p>
+      <p class="subtle">Masuk menggunakan akun yang sudah dibuat oleh masing-masing AM.</p>
       <form id="loginForm" class="auth-form">
-        <label>Email / ID Login
+        <label>ID Login
           <input id="loginEmail" type="text" autocomplete="username" placeholder="contoh: outlet001@expiry.local" required>
         </label>
         <label>Password
@@ -37,7 +37,7 @@
           <img src="logo-tomoro.png" class="brand-logo" alt="TOMORO COFFEE">
         </div>
         <div class="brand-info">
-          <strong>EXPIRY MONITOR</strong>
+          <strong>EXPIRED MONITORING</strong>
           <span>Food Safety System</span>
         </div>
       </div>
@@ -54,8 +54,7 @@
       <nav>
         <button class="nav-item active">Dashboard</button>
         <button class="nav-item" id="jumpAdd">Tambah Produk</button>
-        <button class="nav-item" id="enableNotif">Aktifkan Notifikasi</button>
-        <button class="nav-item" id="installApp" hidden>Install App</button>
+        <button class="nav-item" id="installApp" hidden>Install Apps [Coming Soon]</button>
       </nav>
       <div class="sidebar-note"><span>🔔</span><p>Notifikasi lokal bekerja paling baik saat aplikasi/browser tetap aktif. Untuk alarm saat aplikasi tertutup total, gunakan backend push atau aplikasi native.</p></div>
     </aside>
@@ -67,8 +66,8 @@
             <img src="logo-tomoro.png" alt="TOMORO COFFEE">
           </div>
           <p class="eyebrow">TOMORO COFFEE • F&B OPERATIONS</p>
-          <h2>Dashboard Expiry Produk</h2>
-          <p class="subtle">Pantau expiry dan reminder produk secara real-time.</p>
+          <h2>Dashboard Produk Expired</h2>
+          <p class="subtle">Pantau expired produk dan reminder produk secara real-time.</p>
         </div>
         <div class="top-actions">
           <button class="alarm-enable-btn" id="enableSoundAlarm">🔊 Aktifkan Alarm Suara</button>
@@ -80,7 +79,7 @@
 
       <section class="alarm-ready-card" id="alarmReadyCard">
         <div class="alarm-control-copy">
-          <strong>Kitchen Alarm</strong>
+          <strong>BAR Alarm</strong>
           <p id="alarmReadyText">Aktifkan alarm agar warning dan expired bisa memicu suara saat halaman tetap terbuka.</p>
         </div>
         <div class="alarm-settings-row">
@@ -93,7 +92,6 @@
             </select>
           </label>
           <button class="secondary-btn" id="testAlarmBtn">▶ Test Alarm</button>
-          <button class="alarm-enable-btn" id="alarmReadyAction">🔊 Aktifkan Alarm</button>
         </div>
       </section>
 
