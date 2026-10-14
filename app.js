@@ -435,7 +435,7 @@ function ensureAudio(){
   if (audioCtx.state === "suspended") audioCtx.resume();
 }
 
-function beep(freq=880, duration=.18, volume=.18){
+function beep(freq=880, duration=.5, volume=.5){
   ensureAudio();
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
