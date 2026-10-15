@@ -435,15 +435,24 @@ function ensureAudio(){
   if (audioCtx.state === "suspended") audioCtx.resume();
 }
 
-function beep(freq=880, duration=.18, volume=.5){
+
+function beep(freq=880, duration=.18, volume=.8){
   ensureAudio();
+
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
+
   osc.frequency.value = freq;
-  gain.gain.value = volume;
+  gain.gain.value = Math.max(0, Math.min(volume, 1));
+
   osc.connect(gain).connect(audioCtx.destination);
   osc.start();
-  gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+  gain.gain.exponentialRampToValueAtTime(
+    0.001,
+    audioCtx.currentTime + duration
+  );
+
   osc.stop(audioCtx.currentTime + duration);
 }
 
