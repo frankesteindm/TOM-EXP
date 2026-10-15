@@ -435,7 +435,7 @@ function ensureAudio(){
   if (audioCtx.state === "suspended") audioCtx.resume();
 }
 
-function beep(freq=880, duration=.5, volume=.5){
+function beep(freq=880, duration=.18, volume=.5){
   ensureAudio();
   const osc = audioCtx.createOscillator();
   const gain = audioCtx.createGain();
@@ -447,18 +447,22 @@ function beep(freq=880, duration=.5, volume=.5){
   osc.stop(audioCtx.currentTime + duration);
 }
 
-function soundPattern(level){
+function soundPattern(level) {
   if (level === "expired") {
-    beep(980,.22,.3);
-    setTimeout(()=>beep(720,.22,.3),260);
-    setTimeout(()=>beep(980,.25,.3),520);
+    beep(980, .22, .9);
+    setTimeout(() => beep(720, .22, .9), 260);
+    setTimeout(() => beep(980, .25, .9), 520);
   } else {
-    beep(760,.16,.2);
-    setTimeout(()=>beep(920,.16,.2),220);
+    beep(760, .16, .75);
+    setTimeout(() => beep(920, .16, .75), 220);
   }
-  navigator.vibrate?.(level === "expired" ? [300,120,300,120,600] : [200,100,200]);
-}
 
+  navigator.vibrate?.(
+    level === "expired"
+      ? [300, 120, 300, 120, 600]
+      : [200, 100, 200]
+  );
+}
 function alarmKey(p, level){
   return `${p.id}:${level}:${p.expiry_at}`;
 }
@@ -638,7 +642,7 @@ document.addEventListener("click",(e)=>{
     if(sound === "beep"){
       beep(900,.12,.22); setTimeout(()=>beep(900,.12,.22),180); setTimeout(()=>beep(900,.12,.22),360);
     } else if(sound === "bell"){
-      beep(660,.35,.20); setTimeout(()=>beep(880,.45,.18),320);
+      beep(660,.35,.20); setTimeout(()=>beep(880,.45,.),320);
     } else {
       soundPattern("expired");
     }
